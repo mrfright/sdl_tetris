@@ -30,3 +30,9 @@
 
 # Debug files
 *.dSYM/
+
+#the executable
+sdl_tetris
+
+#gedit temp files
+*~
