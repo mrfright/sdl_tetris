@@ -65,12 +65,13 @@ int main(void) {
     }
 
     //load media
-    Texture = loadTexture("tetris.png");
+/*    Texture = loadTexture("tetris.png");
     if(Texture == NULL) {
         printf("failed to load texture image\n");
         return -1;
     }
-
+not using for now*/
+    
     int still_playing = 1;
 
     SDL_Event e;
@@ -81,8 +82,14 @@ int main(void) {
             }
         }
 
+        SDL_SetRenderDrawColor(Renderer, 0x00, 0x00, 0x00, 0xFF);
         SDL_RenderClear(Renderer);
-        SDL_RenderCopy(Renderer, Texture, NULL, NULL);
+        //SDL_RenderCopy(Renderer, Texture, NULL, NULL);
+
+        SDL_Rect fillRect = {0, 0, BLOCK_SIZE, BLOCK_SIZE};
+        SDL_SetRenderDrawColor(Renderer, 0x00, 0xFF, 0x00, 0xFF);
+        SDL_RenderFillRect(Renderer, &fillRect);
+
         SDL_RenderPresent(Renderer);
     }
 
