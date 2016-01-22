@@ -9,6 +9,48 @@ SDL_Window *Window = NULL;
 SDL_Renderer *Renderer = NULL;
 SDL_Texture *Texture = NULL;
 
+struct Block {
+    Uint8 Red;
+    Uint8 Green;
+    Uint8 Blue;
+};
+
+Block GameBlocks[GAME_WIDTH][GAME_HEIGHT] = {};
+
+void SetGameBlock(int x, int y, Uint8 red, Uint8 green, Uint8 blue) {
+    GameBlocks[x][y].Red = red;
+    GameBlocks[x][y].Green = green;
+    GameBlocks[x][y].Blue = blue;
+}
+
+void ClearGameBlock(int x, int y) {
+    SetGameBlock(x, y, 0, 0, 0);
+}
+
+void ClearAllGameBlocks() {    
+    for(int x = 0; x < GAME_WIDTH; ++x) {
+        for(int y = 0; y < GAME_HEIGHT; ++y) {
+            ClearGameBlock(x, y);
+        }
+    }
+}
+
+void DrawGameBlocks() {
+    for(int x = 0; x < GAME_WIDTH; ++x) {
+        for(int y = 0; y < GAME_HEIGHT; ++y) {
+
+            SDL_Rect fillRect = {x*BLOCK_SIZE, y*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE};
+            SDL_SetRenderDrawColor(Renderer,
+                                   GameBlocks[x][y].Red,
+                                   GameBlocks[x][y].Green,
+                                   GameBlocks[x][y].Blue,
+                                   0xFF);
+            SDL_RenderFillRect(Renderer, &fillRect);
+            
+        }
+    }
+}
+
 SDL_Texture* loadTexture(char *path) {
     SDL_Texture *newTexture = NULL;
     SDL_Surface* loadedSurface = IMG_Load(path);
@@ -28,6 +70,17 @@ SDL_Texture* loadTexture(char *path) {
     return newTexture;
 }
 
+int ContainsBlock(int x, int y) {
+    return GameBlocks[x][y].Red == 0 &&
+           GameBlocks[x][y].Green == 0 &&
+           GameBlocks[x][y].Blue == 0;
+}
+
+//1 for successfully placed, 0 for can't and didn't
+int placeItetriminoUp(int x, int y) {
+    
+}
+
 int main(void) {
 
     //init
@@ -39,6 +92,8 @@ int main(void) {
     if(!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1")) {
         printf("warning: linear texture filtering not enabled\n");
     }
+
+    ClearAllGameBlocks();
 
     Window = SDL_CreateWindow("SDL Tetris",
                               SDL_WINDOWPOS_UNDEFINED,
@@ -63,14 +118,6 @@ int main(void) {
         printf("SDL_image could not initialize: %s\n", IMG_GetError());
         return -1;
     }
-
-    //load media
-/*    Texture = loadTexture("tetris.png");
-    if(Texture == NULL) {
-        printf("failed to load texture image\n");
-        return -1;
-    }
-not using for now*/
     
     int still_playing = 1;
 
@@ -84,11 +131,16 @@ not using for now*/
 
         SDL_SetRenderDrawColor(Renderer, 0x00, 0x00, 0x00, 0xFF);
         SDL_RenderClear(Renderer);
-        //SDL_RenderCopy(Renderer, Texture, NULL, NULL);
-
-        SDL_Rect fillRect = {0, 0, BLOCK_SIZE, BLOCK_SIZE};
-        SDL_SetRenderDrawColor(Renderer, 0x00, 0xFF, 0x00, 0xFF);
-        SDL_RenderFillRect(Renderer, &fillRect);
+        
+        SetGameBlock(0, 0, 255, 0, 0);
+        SetGameBlock(GAME_WIDTH-1, GAME_HEIGHT-1, 0, 255, 0);
+        SetGameBlock(0, GAME_HEIGHT-1, 0, 0, 255);
+        SetGameBlock(GAME_WIDTH-1, 0, 0, 50, 50);
+        SetGameBlock(GAME_WIDTH / 2,
+                     GAME_HEIGHT / 2,
+                     0, 50, 50);
+        
+        DrawGameBlocks();
 
         SDL_RenderPresent(Renderer);
     }
