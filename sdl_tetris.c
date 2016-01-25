@@ -84,8 +84,140 @@ int ContainsBlock(int x, int y) {
 
 //{{x0, y0}, {x1, y1}, {x2, y2}, {x3, y3}}
 //piece[blocknum][0=x : 1=y]
+/*
+  [x,y]
+  
+  [0,0][1,0][2,0][3,0]
+  [0,1][1,1][2,1][3,1]
+  [0,2][1,2][2,2][3,2]
+  [0,3][1,3][2,3][3,3]
+ */
+
+/*
+  [][][][]
+ */
 const int ItetriminoSide[][2] = {{0, 0}, {1, 0}, {2, 0}, {3, 0}};
+
+/*
+  []
+  []
+  []
+  []
+ */
 const int ItetriminoUp[][2] = {{0, 0}, {0, 1}, {0, 2}, {0, 3}};
+
+/*
+    []
+    []
+  [][]
+ */
+const int JtetriminoUp[][2] = {{1, 0}, {1, 1}, {0, 2}, {1, 2}};
+
+/*
+  []
+  [][][]
+ */
+const int JtetriminoRight[][2] = {{0, 0}, {0, 1}, {1, 1}, {2, 1}};
+
+/*
+  [][]
+  []
+  []
+ */
+const int JtetriminoDown[][2] = {{0, 0}, {1, 0}, {0, 1}, {0, 2}};
+
+/*
+  [][][]
+  []
+ */
+const int JtetriminoLeft[][2] = {{0, 0}, {1, 0}, {2, 0}, {0, 1}};
+
+/*
+  []
+  []
+  [][]
+ */
+const int LtetriminoUp[][2] = {{0, 0}, {0, 1}, {0, 2}, {1, 2}};
+
+/*
+  [][][]
+  []
+ */
+const int LtetriminoRight[][2] = {{0, 0}, {1, 0}, {2, 0}, {0, 1}};
+
+/*
+  [][]
+    []
+    []
+ */
+const int LtetriminoDown[][2] = {{0, 0}, {1, 0}, {1, 1}, {1, 2}};
+
+/*
+      []
+  [][][]
+ */
+const int LtetriminoLeft[][2] = {{2, 0}, {0, 1}, {1, 1}, {2, 1}};
+
+/*
+  [][]
+  [][]
+ */
+const int Otetrimino[][2] = {{0, 0}, {1, 0}, {0, 1}, {1, 1}};
+
+/*
+    [][]
+  [][]
+ */
+const int StetriminoSide[][2] = {{1, 0}, {2, 0}, {0, 1}, {1, 1}};
+
+/*
+  []
+  [][]
+    []
+ */
+const int StetriminoUp[][2] = {{0, 0}, {0, 1}, {1, 1}, {1, 2}};
+
+/*
+  [][][]
+    []
+ */
+const int TtetriminoUp[][2] = {{0, 0}, {1, 0}, {2, 0}, {1, 1}};
+
+/*
+    []
+  [][]
+    []
+*/
+const int TtetriminoRight[][2] = {{1, 0}, {0, 1}, {1, 1}, {1, 2}};
+
+/*
+    []
+  [][][]
+*/
+const int TtetriminoDown[][2] = {{1, 0}, {0, 1}, {1, 1}, {1, 2}};
+
+/*
+  []
+  [][]
+  []
+*/
+const int TtetriminoLeft[][2] = {{0, 0}, {0, 1}, {1, 1}, {0, 2}};
+
+/*
+  [][]
+    [][]
+*/
+const int ZtetriminoSide[][2] = {{0, 0}, {1, 0}, {1, 1}, {2, 1}};
+
+/*
+    []
+  [][]
+  []
+*/
+const int ZtetriminoUp[][2] = {{1, 0}, {0, 1}, {1, 1}, {0, 2}};
+
+
+
 
 //return 1 for successfully placed, 0 for can't and didn't
 int placePiece(int x, int y, const int piece[][2]) {
