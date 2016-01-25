@@ -58,7 +58,7 @@ SDL_Texture* loadTexture(char *path) {
     if(loadedSurface == NULL) {
         printf("unable to load image %s: %s\n", path, IMG_GetError());
         return NULL;
-    }
+     }
 
     newTexture = SDL_CreateTextureFromSurface(Renderer, loadedSurface);
     if(newTexture == NULL) {
@@ -70,15 +70,42 @@ SDL_Texture* loadTexture(char *path) {
     return newTexture;
 }
 
-int ContainsBlock(int x, int y) {
+//returns 1 if the location is empty, 0 if not empty (contains a block)
+int BlockEmpty(int x, int y) {
     return GameBlocks[x][y].Red == 0 &&
            GameBlocks[x][y].Green == 0 &&
            GameBlocks[x][y].Blue == 0;
 }
 
-//1 for successfully placed, 0 for can't and didn't
-int placeItetriminoUp(int x, int y) {
-    
+//returns 1 if the location contains a block, 0 if empty
+int ContainsBlock(int x, int y) {
+    return !BlockEmpty(x, y);
+}
+
+//{{x0, y0}, {x1, y1}, {x2, y2}, {x3, y3}}
+//piece[blocknum][0=x : 1=y]
+const int ItetriminoSide[][2] = {{0, 0}, {1, 0}, {2, 0}, {3, 0}};
+const int ItetriminoUp[][2] = {{0, 0}, {0, 1}, {0, 2}, {0, 3}};
+
+//return 1 for successfully placed, 0 for can't and didn't
+int placePiece(int x, int y, const int piece[][2]) {
+    {for(int block = 0; block < 4; ++block) {        
+        if(ContainsBlock(piece[block][0]+x, piece[block][1]+y)) {
+            return 0;
+        }
+    }}
+
+    {for(int block = 0; block < 4; ++block) {
+            SetGameBlock(piece[block][0]+x, piece[block][1]+y, 255, 0, 0);
+    }}
+
+    return 1;
+}
+
+void removePiece(int x, int y, const int piece[][2]) {
+    {for(int coord = 0; coord < 4; ++coord) {        
+        ClearGameBlock(piece[coord][0]+x, piece[coord][1]+y);         
+    }}
 }
 
 int main(void) {
@@ -122,6 +149,13 @@ int main(void) {
     int still_playing = 1;
 
     SDL_Event e;
+
+    printf("int ItetriminoUp[][2] = {{0, 0}, {1, 0}, {2, 0}, {3, 0}};\n");
+    for(int i = 0; i < 4; ++i) {
+        printf("ItetriminoUp[%d][0]: %d\tItetriminoUp[%d][1]: %d\n", i, ItetriminoUp[i][0],
+               i, ItetriminoUp[i][1]);
+    }
+    
     while(still_playing) {
         while(SDL_PollEvent(&e)) {
             if(e.type == SDL_QUIT) {
@@ -133,12 +167,32 @@ int main(void) {
         SDL_RenderClear(Renderer);
         
         SetGameBlock(0, 0, 255, 0, 0);
+        int test = ContainsBlock(0, 0);
+        if(! test){
+            printf("Contains Block error at 0,0\n");
+        }
         SetGameBlock(GAME_WIDTH-1, GAME_HEIGHT-1, 0, 255, 0);
+        
         SetGameBlock(0, GAME_HEIGHT-1, 0, 0, 255);
         SetGameBlock(GAME_WIDTH-1, 0, 0, 50, 50);
         SetGameBlock(GAME_WIDTH / 2,
                      GAME_HEIGHT / 2,
                      0, 50, 50);
+
+        removePiece(1, 1, ItetriminoUp);
+        
+        if(placePiece(1, 1, ItetriminoUp) == 0) {
+            printf("error placing I up, failed when should succeed\n");
+        }
+        
+        if(placePiece(0, 0, ItetriminoUp) != 0) {
+            printf("error placing I up, succeed when should fail\n");
+        }
+
+        removePiece(3, 2, ItetriminoSide);
+        if(placePiece(3, 2, ItetriminoSide) == 0) {
+            printf("error placing I side, fail when should succeed\n");
+        }
         
         DrawGameBlocks();
 
