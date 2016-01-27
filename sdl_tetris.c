@@ -318,6 +318,12 @@ int main(void) {
     int current_red = 0;
     int current_green = 0;
     int current_blue = 0;
+    int ticks = SDL_GetTicks();
+
+    //update ticks to current time when moved down
+
+    //try to auto move down when ticks gets to a certain size (then update ticks back to current)
+    //if can't auto move down, then block is place, move to block starting over again
 
     //use SDL_EnableKeyRepeat for key repeat for while holding button down
     
@@ -327,28 +333,89 @@ int main(void) {
                 still_playing = 0;
             }
              else if( e.type == SDL_KEYDOWN ) {
-             //Select surfaces based on key press
                  switch( e.key.keysym.sym ) {
-                     case SDLK_UP:
-                         //rotate piece
-                         break;
-                     case SDLK_DOWN:
-                         //move down
-                         //see if can move down
-                         //TODO don't check a pieces own blocks
+                     case SDLK_UP: {
+                         //rotate piece - up->right->down->left->up
+
                          //remove piece
-                         //check if can move
-                         //  if you can, add 1 to y
-                         //place piece again
+                         //if rotated piece can be placed then keep it
+                         //if not then go back to original piece
+                         //place whatever piece back
 
                          removePiece(current_x, current_y, CurrentPiece);
+                         const int (*TempPiece)[2] = CurrentPiece;
+                         
+                         if(CurrentPiece == ItetriminoUp) {
+                             TempPiece = ItetriminoSide;
+                         }
+                         else if(CurrentPiece == ItetriminoSide) {
+                             TempPiece = ItetriminoUp;
+                         }
+                         else if(CurrentPiece == ZtetriminoUp) {
+                             TempPiece = ZtetriminoSide;
+                         }
+                         else if(CurrentPiece == ZtetriminoSide) {
+                             TempPiece = ZtetriminoUp;
+                         }
+                         else if(CurrentPiece == JtetriminoUp) {
+                             TempPiece = JtetriminoRight;
+                         }
+                         else if(CurrentPiece == JtetriminoRight) {
+                             TempPiece = JtetriminoDown;
+                         }
+                         else if(CurrentPiece == JtetriminoDown) {
+                             TempPiece = JtetriminoLeft;
+                         }
+                         else if(CurrentPiece == JtetriminoLeft) {
+                             TempPiece = JtetriminoUp;
+                         }
+                         else if(CurrentPiece == LtetriminoUp) {
+                             TempPiece = LtetriminoRight;
+                         }
+                         else if(CurrentPiece == LtetriminoRight) {
+                             TempPiece = LtetriminoDown;
+                         }
+                         else if(CurrentPiece == LtetriminoDown) {
+                             TempPiece = LtetriminoLeft;
+                         }
+                         else if(CurrentPiece == LtetriminoLeft) {
+                             TempPiece = LtetriminoUp;
+                         }
+                         //Otetrimino:
+                         else if(CurrentPiece == StetriminoUp) {
+                             TempPiece = StetriminoSide;
+                         }
+                         else if(CurrentPiece == StetriminoSide) {
+                             TempPiece = StetriminoUp;
+                         }
+                         else if(CurrentPiece == TtetriminoUp) {
+                             TempPiece = TtetriminoRight;
+                         }
+                         else if(CurrentPiece == TtetriminoRight) {
+                             TempPiece = TtetriminoDown;
+                         }
+                         else if(CurrentPiece == TtetriminoDown) {
+                             TempPiece = TtetriminoLeft;
+                         }
+                         else if(CurrentPiece == TtetriminoLeft) {
+                             TempPiece = TtetriminoUp;
+                         }
+                                                  
+                         if(PieceContainsBlock(TempPiece, current_x , current_y)) {
+                             TempPiece = CurrentPiece;
+                         }
+
+                         CurrentPiece = TempPiece;
+                         if(placePiece(current_x, current_y, TempPiece,
+                                       current_red, current_green, current_blue) == 0) {
+                             printf("placing rotated piece failed\n");
+                         }
+                         
+                         break;
+                     }
+                     case SDLK_DOWN: {
+                         removePiece(current_x, current_y, CurrentPiece);
                          if(!PieceContainsBlock(CurrentPiece, current_x, current_y+1)) {
-                         //remove current piece
-                             
-                         //place new piece down
-                             
-                                        
-                         //update coor
                              ++current_y;
                          }
                          
@@ -356,48 +423,29 @@ int main(void) {
                                     current_red, current_green, current_blue);
                          
                          break;
-                     case SDLK_LEFT:
-                         //move left
-                         //see if can move piece left
-                         //remove current piece
-                         //place new piece left
-                         //update coord
+                     }
+                     case SDLK_LEFT: {
                          removePiece(current_x, current_y, CurrentPiece);
                          if(!PieceContainsBlock(CurrentPiece, current_x-1, current_y)) {
-                         //remove current piece
-                             
-                         //place new piece down
-                             
-                                        
-                         //update coor
                              --current_x;
                          }
                          
                          placePiece(current_x, current_y, CurrentPiece,
                                     current_red, current_green, current_blue);
                          break;
-                     case SDLK_RIGHT:
-                         //move right
-                         //see if can move piece right
-                         //remove current piece
-                         //place new piece right
-                         //update coord
+                     }                         
+                     case SDLK_RIGHT: {
                          removePiece(current_x, current_y, CurrentPiece);
                          if(!PieceContainsBlock(CurrentPiece, current_x+1, current_y)) {
-                         //remove current piece
-                             
-                         //place new piece down
-                             
-                                        
-                         //update coor
                              ++current_x;
                          }
                          
                          placePiece(current_x, current_y, CurrentPiece,
                                     current_red, current_green, current_blue);
                          break;
-                     default://do nothing
-                         break;
+                     }                         
+                     default: {//do nothing
+                     } break;
                  }
              }
         }
