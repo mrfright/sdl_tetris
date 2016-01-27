@@ -417,6 +417,9 @@ int main(void) {
                          removePiece(current_x, current_y, CurrentPiece);
                          if(!PieceContainsBlock(CurrentPiece, current_x, current_y+1)) {
                              ++current_y;
+                             ticks = SDL_GetTicks();
+                             //only update ticks if actually moved, so can't
+                             //indefinitely stay at bottom if holding down button
                          }
                          
                          placePiece(current_x, current_y, CurrentPiece,
@@ -448,6 +451,20 @@ int main(void) {
                      } break;
                  }
              }
+        }
+
+        if(SDL_GetTicks() - ticks >= 1000) {
+            removePiece(current_x, current_y, CurrentPiece);
+            if(!PieceContainsBlock(CurrentPiece, current_x, current_y+1)) {
+                ++current_y;
+                placePiece(current_x, current_y, CurrentPiece,
+                    current_red, current_green, current_blue);
+            }
+            else {//can't auto go down, so keep piece here
+                
+            }
+
+            ticks = SDL_GetTicks();
         }
 
         SDL_SetRenderDrawColor(Renderer, 0x00, 0x00, 0x00, 0xFF);
