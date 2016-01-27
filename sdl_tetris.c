@@ -15,6 +15,14 @@ struct Block {
     Uint8 Blue;
 };
 
+/*
+struct Piece {
+    const int (*blocks)[2];
+    int x;
+    int y;
+};
+*/
+
 Block GameBlocks[GAME_WIDTH][GAME_HEIGHT] = {};
 
 void SetGameBlock(int x, int y, Uint8 red, Uint8 green, Uint8 blue) {
@@ -70,9 +78,13 @@ SDL_Texture* loadTexture(char *path) {
     return newTexture;
 }
 
-//returns 1 if the location is empty, 0 if not empty (contains a block)
+//returns 1 if the location is empty (and on the game grid), 0 if not empty (contains a block or off the grid)
 int BlockEmpty(int x, int y) {
-    return GameBlocks[x][y].Red == 0 &&
+    return x < GAME_WIDTH &&
+           y < GAME_HEIGHT &&
+           x >= 0 &&
+           y >= 0 &&
+           GameBlocks[x][y].Red == 0 &&
            GameBlocks[x][y].Green == 0 &&
            GameBlocks[x][y].Blue == 0;
 }
@@ -80,6 +92,20 @@ int BlockEmpty(int x, int y) {
 //returns 1 if the location contains a block, 0 if empty
 int ContainsBlock(int x, int y) {
     return !BlockEmpty(x, y);
+}
+
+int PieceContainsBlock(const int piece[][2], int x, int y) {
+    {for(int block = 0; block < 4; ++block) {        
+        if(ContainsBlock(piece[block][0]+x, piece[block][1]+y)) {
+            return 1;
+        }
+    }}
+
+    return 0;
+}
+
+int CanPlacePiece(const int piece[][2], int x, int y) {
+    return !PieceContainsBlock(piece, x, y);
 }
 
 //{{x0, y0}, {x1, y1}, {x2, y2}, {x3, y3}}
@@ -220,15 +246,13 @@ const int ZtetriminoUp[][2] = {{1, 0}, {0, 1}, {1, 1}, {0, 2}};
 
 
 //return 1 for successfully placed, 0 for can't and didn't
-int placePiece(int x, int y, const int piece[][2]) {
-    {for(int block = 0; block < 4; ++block) {        
-        if(ContainsBlock(piece[block][0]+x, piece[block][1]+y)) {
-            return 0;
-        }
-    }}
+int placePiece(int x, int y, const int piece[][2], int red, int green, int blue) {
+    if(PieceContainsBlock(piece, x, y)) {
+        return 0;
+    }
 
     {for(int block = 0; block < 4; ++block) {
-            SetGameBlock(piece[block][0]+x, piece[block][1]+y, 255, 0, 0);
+            SetGameBlock(piece[block][0]+x, piece[block][1]+y, red, green, blue);
     }}
 
     return 1;
@@ -287,12 +311,95 @@ int main(void) {
         printf("ItetriminoUp[%d][0]: %d\tItetriminoUp[%d][1]: %d\n", i, ItetriminoUp[i][0],
                i, ItetriminoUp[i][1]);
     }
+
+    const int (*CurrentPiece)[2] = ZtetriminoUp;
+    int current_x = 5;
+    int current_y = 5;
+    int current_red = 0;
+    int current_green = 0;
+    int current_blue = 0;
+
+    //use SDL_EnableKeyRepeat for key repeat for while holding button down
     
     while(still_playing) {
         while(SDL_PollEvent(&e)) {
             if(e.type == SDL_QUIT) {
                 still_playing = 0;
             }
+             else if( e.type == SDL_KEYDOWN ) {
+             //Select surfaces based on key press
+                 switch( e.key.keysym.sym ) {
+                     case SDLK_UP:
+                         //rotate piece
+                         break;
+                     case SDLK_DOWN:
+                         //move down
+                         //see if can move down
+                         //TODO don't check a pieces own blocks
+                         //remove piece
+                         //check if can move
+                         //  if you can, add 1 to y
+                         //place piece again
+
+                         removePiece(current_x, current_y, CurrentPiece);
+                         if(!PieceContainsBlock(CurrentPiece, current_x, current_y+1)) {
+                         //remove current piece
+                             
+                         //place new piece down
+                             
+                                        
+                         //update coor
+                             ++current_y;
+                         }
+                         
+                         placePiece(current_x, current_y, CurrentPiece,
+                                    current_red, current_green, current_blue);
+                         
+                         break;
+                     case SDLK_LEFT:
+                         //move left
+                         //see if can move piece left
+                         //remove current piece
+                         //place new piece left
+                         //update coord
+                         removePiece(current_x, current_y, CurrentPiece);
+                         if(!PieceContainsBlock(CurrentPiece, current_x-1, current_y)) {
+                         //remove current piece
+                             
+                         //place new piece down
+                             
+                                        
+                         //update coor
+                             --current_x;
+                         }
+                         
+                         placePiece(current_x, current_y, CurrentPiece,
+                                    current_red, current_green, current_blue);
+                         break;
+                     case SDLK_RIGHT:
+                         //move right
+                         //see if can move piece right
+                         //remove current piece
+                         //place new piece right
+                         //update coord
+                         removePiece(current_x, current_y, CurrentPiece);
+                         if(!PieceContainsBlock(CurrentPiece, current_x+1, current_y)) {
+                         //remove current piece
+                             
+                         //place new piece down
+                             
+                                        
+                         //update coor
+                             ++current_x;
+                         }
+                         
+                         placePiece(current_x, current_y, CurrentPiece,
+                                    current_red, current_green, current_blue);
+                         break;
+                     default://do nothing
+                         break;
+                 }
+             }
         }
 
         SDL_SetRenderDrawColor(Renderer, 0x00, 0x00, 0x00, 0xFF);
@@ -313,18 +420,20 @@ int main(void) {
 
         removePiece(1, 1, ItetriminoUp);
         
-        if(placePiece(1, 1, ItetriminoUp) == 0) {
+        if(placePiece(1, 1, ItetriminoUp, 255, 0, 0) == 0) {
             printf("error placing I up, failed when should succeed\n");
         }
         
-        if(placePiece(0, 0, ItetriminoUp) != 0) {
+        if(placePiece(0, 0, ItetriminoUp, 255, 0, 0) != 0) {
             printf("error placing I up, succeed when should fail\n");
         }
 
         removePiece(3, 2, ItetriminoSide);
-        if(placePiece(3, 2, ItetriminoSide) == 0) {
+        if(placePiece(3, 2, ItetriminoSide, 255, 0, 0) == 0) {
             printf("error placing I side, fail when should succeed\n");
         }
+
+        placePiece(current_x, current_y, CurrentPiece, 0, 255, 0);
         
         DrawGameBlocks();
 
