@@ -1,6 +1,10 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
+//for the random function
+#include <time.h>
+#include <stdlib.h>
+
 #define BLOCK_SIZE 15
 #define GAME_WIDTH 10
 #define GAME_HEIGHT 20
@@ -120,68 +124,32 @@ int CanPlacePiece(const int piece[][2], int x, int y) {
  */
 
 /*
-  [][][][]
+  [][][][]  []
+            []
+            []
+            []
  */
 const int ItetriminoSide[][2] = {{0, 0}, {1, 0}, {2, 0}, {3, 0}};
-
-/*
-  []
-  []
-  []
-  []
- */
 const int ItetriminoUp[][2] = {{0, 0}, {0, 1}, {0, 2}, {0, 3}};
 
 /*
-    []
-    []
-  [][]
+    []  []      [][]  [][][]
+    []  [][][]  []        []
+  [][]          []
  */
 const int JtetriminoUp[][2] = {{1, 0}, {1, 1}, {0, 2}, {1, 2}};
-
-/*
-  []
-  [][][]
- */
 const int JtetriminoRight[][2] = {{0, 0}, {0, 1}, {1, 1}, {2, 1}};
-
-/*
-  [][]
-  []
-  []
- */
 const int JtetriminoDown[][2] = {{0, 0}, {1, 0}, {0, 1}, {0, 2}};
+const int JtetriminoLeft[][2] = {{0, 0}, {1, 0}, {2, 0}, {0, 2}};
 
 /*
-  [][][]
-  []
- */
-const int JtetriminoLeft[][2] = {{0, 0}, {1, 0}, {2, 0}, {0, 1}};
-
-/*
-  []
-  []
-  [][]
+  []    [][][]  [][]      []
+  []    []        []  [][][]
+  [][]            []
  */
 const int LtetriminoUp[][2] = {{0, 0}, {0, 1}, {0, 2}, {1, 2}};
-
-/*
-  [][][]
-  []
- */
 const int LtetriminoRight[][2] = {{0, 0}, {1, 0}, {2, 0}, {0, 1}};
-
-/*
-  [][]
-    []
-    []
- */
 const int LtetriminoDown[][2] = {{0, 0}, {1, 0}, {1, 1}, {1, 2}};
-
-/*
-      []
-  [][][]
- */
 const int LtetriminoLeft[][2] = {{2, 0}, {0, 1}, {1, 1}, {2, 1}};
 
 /*
@@ -191,59 +159,30 @@ const int LtetriminoLeft[][2] = {{2, 0}, {0, 1}, {1, 1}, {2, 1}};
 const int Otetrimino[][2] = {{0, 0}, {1, 0}, {0, 1}, {1, 1}};
 
 /*
-    [][]
-  [][]
+    [][]  []
+  [][]    [][]
+            []
  */
 const int StetriminoSide[][2] = {{1, 0}, {2, 0}, {0, 1}, {1, 1}};
-
-/*
-  []
-  [][]
-    []
- */
 const int StetriminoUp[][2] = {{0, 0}, {0, 1}, {1, 1}, {1, 2}};
 
 /*
-  [][][]
-    []
+  [][][]   []    []    []
+    []   [][]  [][][]  [][]
+           []          []
  */
 const int TtetriminoUp[][2] = {{0, 0}, {1, 0}, {2, 0}, {1, 1}};
-
-/*
-    []
-  [][]
-    []
-*/
 const int TtetriminoRight[][2] = {{1, 0}, {0, 1}, {1, 1}, {1, 2}};
-
-/*
-    []
-  [][][]
-*/
 const int TtetriminoDown[][2] = {{1, 0}, {0, 1}, {1, 1}, {1, 2}};
-
-/*
-  []
-  [][]
-  []
-*/
 const int TtetriminoLeft[][2] = {{0, 0}, {0, 1}, {1, 1}, {0, 2}};
 
 /*
-  [][]
-    [][]
+  [][]      []
+    [][]  [][]
+          []
 */
 const int ZtetriminoSide[][2] = {{0, 0}, {1, 0}, {1, 1}, {2, 1}};
-
-/*
-    []
-  [][]
-  []
-*/
 const int ZtetriminoUp[][2] = {{1, 0}, {0, 1}, {1, 1}, {0, 2}};
-
-
-
 
 //return 1 for successfully placed, 0 for can't and didn't
 int placePiece(int x, int y, const int piece[][2], int red, int green, int blue) {
@@ -267,6 +206,7 @@ void removePiece(int x, int y, const int piece[][2]) {
 int main(void) {
 
     //init
+    srand(time(NULL));
     if(SDL_Init(SDL_INIT_VIDEO) < 0) {
         printf("SDL couldn't initialize: %s\n", SDL_GetError());
         return -1;
@@ -312,7 +252,7 @@ int main(void) {
                i, ItetriminoUp[i][1]);
     }
 
-    const int (*CurrentPiece)[2] = ZtetriminoUp;
+    const int (*CurrentPiece)[2] = NULL;
     int current_x = 5;
     int current_y = 5;
     int current_red = 0;
@@ -328,6 +268,80 @@ int main(void) {
     //use SDL_EnableKeyRepeat for key repeat for while holding button down
     
     while(still_playing) {
+        if(CurrentPiece == NULL) {
+            //make new piece
+
+            current_x = 5;
+            current_y = 0;
+            ticks = SDL_GetTicks();
+
+            //i j l s z o t
+            switch(rand()%6) {
+                case 0: {
+                    CurrentPiece = ItetriminoUp;
+                    current_red = 255;
+                    current_green = 0;
+                    current_blue = 0;
+                } break;
+                
+                case 1: {
+                    CurrentPiece = JtetriminoUp;
+                    current_red = 0;
+                    current_green = 255;
+                    current_blue = 0;
+                } break;
+                
+                case 2: {
+                    CurrentPiece = LtetriminoUp;
+                    current_red = 0;
+                    current_green = 0;
+                    current_blue = 255;
+                } break;
+                
+                case 3: {
+                    CurrentPiece = StetriminoUp;
+                    current_red = 255;
+                    current_green = 255;
+                    current_blue = 0;
+                } break;
+                
+                case 4: {
+                    CurrentPiece = ZtetriminoUp;
+                    current_red = 255;
+                    current_green = 0;
+                    current_blue = 255;
+                } break;
+                
+                case 5: {
+                    CurrentPiece = Otetrimino;
+                    current_red = 0;
+                    current_green = 255;
+                    current_blue = 255;
+                } break;
+                
+                case 6: {
+                    CurrentPiece = TtetriminoUp;
+                    current_red = 255;
+                    current_green = 0;
+                    current_blue = 0;
+                } break;
+                
+                
+                
+            }
+            
+            
+
+            //if can't place new piece, then game over and restart
+            if(PieceContainsBlock(CurrentPiece, current_x, current_y)) {
+                ClearAllGameBlocks();
+            }
+
+            //place the new piece
+            placePiece(current_x, current_y, CurrentPiece,
+                       current_red, current_green, current_blue);
+        }
+        
         while(SDL_PollEvent(&e)) {
             if(e.type == SDL_QUIT) {
                 still_playing = 0;
@@ -453,52 +467,31 @@ int main(void) {
              }
         }
 
+        
+
+        SDL_SetRenderDrawColor(Renderer, 0x00, 0x00, 0x00, 0xFF);
+        SDL_RenderClear(Renderer);
+        
+        
+        placePiece(current_x, current_y, CurrentPiece, 0, 255, 0);
+
         if(SDL_GetTicks() - ticks >= 1000) {
             removePiece(current_x, current_y, CurrentPiece);
             if(!PieceContainsBlock(CurrentPiece, current_x, current_y+1)) {
                 ++current_y;
                 placePiece(current_x, current_y, CurrentPiece,
-                    current_red, current_green, current_blue);
+                       current_red, current_green, current_blue);
             }
             else {//can't auto go down, so keep piece here
-                
+                placePiece(current_x, current_y, CurrentPiece,
+                       current_red, current_green, current_blue);
+                CurrentPiece = NULL;
             }
+
+            
 
             ticks = SDL_GetTicks();
         }
-
-        SDL_SetRenderDrawColor(Renderer, 0x00, 0x00, 0x00, 0xFF);
-        SDL_RenderClear(Renderer);
-        
-        SetGameBlock(0, 0, 255, 0, 0);
-        int test = ContainsBlock(0, 0);
-        if(! test){
-            printf("Contains Block error at 0,0\n");
-        }
-        SetGameBlock(GAME_WIDTH-1, GAME_HEIGHT-1, 0, 255, 0);
-        
-        SetGameBlock(0, GAME_HEIGHT-1, 0, 0, 255);
-        SetGameBlock(GAME_WIDTH-1, 0, 0, 50, 50);
-        SetGameBlock(GAME_WIDTH / 2,
-                     GAME_HEIGHT / 2,
-                     0, 50, 50);
-
-        removePiece(1, 1, ItetriminoUp);
-        
-        if(placePiece(1, 1, ItetriminoUp, 255, 0, 0) == 0) {
-            printf("error placing I up, failed when should succeed\n");
-        }
-        
-        if(placePiece(0, 0, ItetriminoUp, 255, 0, 0) != 0) {
-            printf("error placing I up, succeed when should fail\n");
-        }
-
-        removePiece(3, 2, ItetriminoSide);
-        if(placePiece(3, 2, ItetriminoSide, 255, 0, 0) == 0) {
-            printf("error placing I side, fail when should succeed\n");
-        }
-
-        placePiece(current_x, current_y, CurrentPiece, 0, 255, 0);
         
         DrawGameBlocks();
 
