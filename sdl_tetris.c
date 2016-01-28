@@ -19,14 +19,6 @@ struct Block {
     Uint8 Blue;
 };
 
-/*
-struct Piece {
-    const int (*blocks)[2];
-    int x;
-    int y;
-};
-*/
-
 Block GameBlocks[GAME_WIDTH][GAME_HEIGHT] = {};
 
 void SetGameBlock(int x, int y, Uint8 red, Uint8 green, Uint8 blue) {
@@ -140,7 +132,7 @@ const int ItetriminoUp[][2] = {{0, 0}, {0, 1}, {0, 2}, {0, 3}};
 const int JtetriminoUp[][2] = {{1, 0}, {1, 1}, {0, 2}, {1, 2}};
 const int JtetriminoRight[][2] = {{0, 0}, {0, 1}, {1, 1}, {2, 1}};
 const int JtetriminoDown[][2] = {{0, 0}, {1, 0}, {0, 1}, {0, 2}};
-const int JtetriminoLeft[][2] = {{0, 0}, {1, 0}, {2, 0}, {0, 2}};
+const int JtetriminoLeft[][2] = {{0, 0}, {1, 0}, {2, 0}, {2, 1}};
 
 /*
   []    [][][]  [][]      []
@@ -173,7 +165,7 @@ const int StetriminoUp[][2] = {{0, 0}, {0, 1}, {1, 1}, {1, 2}};
  */
 const int TtetriminoUp[][2] = {{0, 0}, {1, 0}, {2, 0}, {1, 1}};
 const int TtetriminoRight[][2] = {{1, 0}, {0, 1}, {1, 1}, {1, 2}};
-const int TtetriminoDown[][2] = {{1, 0}, {0, 1}, {1, 1}, {1, 2}};
+const int TtetriminoDown[][2] = {{1, 0}, {0, 1}, {1, 1}, {2, 1}};
 const int TtetriminoLeft[][2] = {{0, 0}, {0, 1}, {1, 1}, {0, 2}};
 
 /*
@@ -276,7 +268,7 @@ int main(void) {
             ticks = SDL_GetTicks();
 
             //i j l s z o t
-            switch(rand()%6) {
+            switch(rand()%7) {
                 case 0: {
                     CurrentPiece = ItetriminoUp;
                     current_red = 255;
@@ -321,17 +313,12 @@ int main(void) {
                 
                 case 6: {
                     CurrentPiece = TtetriminoUp;
-                    current_red = 255;
-                    current_green = 0;
-                    current_blue = 0;
-                } break;
-                
-                
-                
+                    current_red = 50;
+                    current_green = 50;
+                    current_blue = 50;
+                } break;                                                
             }
-            
-            
-
+                        
             //if can't place new piece, then game over and restart
             if(PieceContainsBlock(CurrentPiece, current_x, current_y)) {
                 ClearAllGameBlocks();
@@ -395,7 +382,7 @@ int main(void) {
                          else if(CurrentPiece == LtetriminoLeft) {
                              TempPiece = LtetriminoUp;
                          }
-                         //Otetrimino:
+                         //Otetrimino: no rotation
                          else if(CurrentPiece == StetriminoUp) {
                              TempPiece = StetriminoSide;
                          }
@@ -465,13 +452,10 @@ int main(void) {
                      } break;
                  }
              }
-        }
-
-        
+        }        
 
         SDL_SetRenderDrawColor(Renderer, 0x00, 0x00, 0x00, 0xFF);
-        SDL_RenderClear(Renderer);
-        
+        SDL_RenderClear(Renderer);        
         
         placePiece(current_x, current_y, CurrentPiece, 0, 255, 0);
 
@@ -486,12 +470,52 @@ int main(void) {
                 placePiece(current_x, current_y, CurrentPiece,
                        current_red, current_green, current_blue);
                 CurrentPiece = NULL;
-            }
 
-            
+                //check for any full lines
+                //start at the bottom
+                //can stop when reach a row that has no blocks                
+                {for(int row = GAME_HEIGHT-1; row >= 0; --row) {
+                    int no_blocks = 1;
+                    int full_row = 1;
+                    {for(int col = 0; col < GAME_WIDTH; ++col) {
+                        if(ContainsBlock(col, row)) {
+                            no_blocks = 0;
+                        }
+                        else {
+                            full_row = 0;
+                        }
+                    }}
+
+                    if(no_blocks) {
+                        break;
+                    }
+                    else if(full_row) {
+                        //move what ever is above to below                                
+                        //continue until you get a row that is empty
+                
+                        {for(int drop_row = row; drop_row >= 0; --drop_row) {
+                            int no_more_blocks_to_drop = 1;
+                            {for(int drop_col = 0; drop_col < GAME_WIDTH; ++drop_col) {
+                                GameBlocks[drop_col][drop_row] = GameBlocks[drop_col][drop_row-1];
+                                if(ContainsBlock(drop_col, drop_row-1)) {
+                                    no_more_blocks_to_drop = 0;
+                                }
+                            }}
+
+                            if(no_more_blocks_to_drop) {
+                                break;
+                            }
+                        }}
+
+                        //if a row does disappear, then need to do that row again
+                        //(row++ so next way around it gets --row to be same
+                        ++row;
+                    }
+                }}
+            }            
 
             ticks = SDL_GetTicks();
-        }
+        }        
         
         DrawGameBlocks();
 
