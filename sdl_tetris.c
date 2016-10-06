@@ -1,5 +1,13 @@
+#ifdef LINUX
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#endif
+
+#ifdef WINDOWS
+#include "SDL_win\SDL.h"
+#include "SDL_win\SDL_image.h"
+#endif
+
 
 //for the random function
 #include <time.h>
