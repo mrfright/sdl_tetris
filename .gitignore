@@ -21,7 +21,8 @@
 *.dylib
 
 # Executables
-*.exe
+# adding executable for now for easy downloads
+#*.exe
 *.out
 *.app
 *.i*86
@@ -30,6 +31,8 @@
 
 # Debug files
 *.dSYM/
+*.ilk
+*.pdb
 
 #the executable
 sdl_tetris

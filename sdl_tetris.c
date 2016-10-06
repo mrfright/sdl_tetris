@@ -6,6 +6,9 @@
 #ifdef WINDOWS
 #include "SDL_win\SDL.h"
 #include "SDL_win\SDL_image.h"
+#ifdef main
+#undef main
+#endif
 #endif
 
 
@@ -27,7 +30,7 @@ struct Block {
     Uint8 Blue;
 };
 
-Block GameBlocks[GAME_WIDTH][GAME_HEIGHT] = {};
+struct Block GameBlocks[GAME_WIDTH][GAME_HEIGHT];
 
 void SetGameBlock(int x, int y, Uint8 red, Uint8 green, Uint8 blue) {
     GameBlocks[x][y].Red = red;
